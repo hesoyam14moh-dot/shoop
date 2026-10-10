@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>TAKST</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Tahoma,sans-serif}
+body{background:#0a0014;color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#lgn{max-width:320px;width:100%;background:#12004a;border:1px solid #2a1a5e;border-radius:16px;padding:20px;text-align:center}
+#lgn img{width:70px;height:70px;border-radius:50%;border:3px solid #a855f7;margin-bottom:10px}
+#lgn h1{font-size:18px;letter-spacing:3px;margin-bottom:12px;color:#c084fc}
+#lgn input,#lgn button{width:100%;padding:11px;border:none;border-radius:8px;font-size:14px;margin-bottom:8px}
+#lgn input{background:#0a0014;border:1px solid #2a1a5e;color:#fff;text-align:center}
+#lgn button{background:linear-gradient(90deg,#a855f7,#3b82f6);color:#fff;font-weight:bold;cursor:pointer}
+#msg{font-size:12px;color:#ff6b6b;min-height:14px}
+#game{position:fixed;inset:0;display:none}
+#game.on{display:block}
+#cvs{position:absolute;inset:0;background:linear-gradient(180deg,#dfeaff,#fff)}
+#cvs canvas{display:block;width:100%!important;height:100%!important;touch-action:none}
+.bar{position:absolute;top:12px;left:12px;right:12px;display:flex;justify-content:space-between;align-items:flex-start;z-index:10;pointer-events:none}
+.u{display:flex;gap:8px;align-items:center}
+.u img,.u .ph{width:48px;height:48px;border-radius:50%;border:2px solid #a855f7;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:20px;color:#aaa;object-fit:cover}
+.u .n{font-size:14px;font-weight:bold;color:#222;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.r{display:flex;flex-direction:column;gap:5px;align-items:flex-end;pointer-events:auto}
+.co{background:#000;border:2px solid #ffd400;border-radius:20px;padding:4px 10px;display:flex;align-items:center;gap:5px;font-weight:bold;color:#ffd400;font-size:16px}
+.co img{width:20px;height:20px;border-radius:50%;border:2px solid #ffd400}
+.sv{background:#22c55e;color:#fff;border:none;font-size:11px;font-weight:bold;padding:6px 10px;border-radius:16px;cursor:pointer}
+.shop{position:absolute;bottom:0;left:0;right:0;background:#fff;border-radius:18px 18px 0 0;transform:translateY(calc(100% - 55px));transition:.3s;z-index:20;max-height:68vh;display:flex;flex-direction:column}
+.shop.open{transform:translateY(0)}
+.hd{height:55px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;position:relative;color:#222}
+.hd .bar2{width:36px;height:4px;background:#ccc;border-radius:2px;margin-bottom:4px}
+.hd .tt{font-size:13px;font-weight:bold}
+.hd .cb{position:absolute;top:8px;left:16px;background:#f5b800;color:#fff;font-size:11px;font-weight:bold;padding:2px 8px;border-radius:10px;display:none}
+.hd .cb.on{display:block}
+.bd{overflow-y:auto;padding:0 10px 14px;flex:1}
+.ttl{font-size:11px;color:#666;font-weight:bold;margin:8px 2px 4px}
+.clrs{display:flex;gap:6px;margin-bottom:8px}
+.clr{width:28px;height:28px;border-radius:50%;border:2px solid #eee;cursor:pointer}
+.clr.on{border-color:#a855f7;box-shadow:0 0 0 2px rgba(168,85,247,.3)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.it{background:#fafafa;border:1px solid #eee;border-radius:10px;padding:8px 4px;text-align:center;cursor:pointer;position:relative}
+.it.own{border-color:#4ade80;background:#eafff1}
+.it.eq{border-color:#a855f7;background:#f5ecff}
+.it.crt{border-color:#f5b800;background:#fff8e1}
+.it .ic{font-size:22px;height:28px;display:flex;align-items:center;justify-content:center}
+.it .ic img{width:28px;height:28px;border-radius:5px;object-fit:cover}
+.it .nm{font-size:10px;font-weight:bold;color:#333;margin-top:3px}
+.it .pr{font-size:10px;color:#f5b800;font-weight:bold;margin-top:3px;display:flex;align-items:center;justify-content:center;gap:3px}
+.it .pr img{width:11px;height:11px;border-radius:50%}
+.it .bd2{position:absolute;top:3px;right:3px;font-size:9px;padding:1px 5px;border-radius:5px;font-weight:bold;color:#fff}
+.bb{padding:8px 12px 12px;border-top:1px solid #eee;display:none;background:#fafafa}
+.bb.on{display:block}
+.bb .rw{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:13px}
+.bb .rw .a{color:#f5b800;font-weight:bold;font-size:16px;display:flex;align-items:center;gap:4px}
+.bb .rw .a img{width:16px;height:16px;border-radius:50%;border:2px solid #ffd400}
+.bb button{width:100%;padding:10px;border:none;border-radius:8px;background:linear-gradient(90deg,#a855f7,#3b82f6);color:#fff;font-weight:bold;font-size:13px;cursor:pointer}
+.bb button:disabled{opacity:.5}
+.mdl{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;padding:20px;z-index:200}
+.mdl.on{display:flex}
+.mb{background:#12004a;border:1px solid #a855f7;border-radius:14px;padding:18px;max-width:380px;width:100%;text-align:center}
+.mb h3{color:#c084fc;margin-bottom:8px;font-size:15px}
+.mb .cd{background:#000;border:1px dashed #a855f7;border-radius:8px;padding:10px;font-size:10px;color:#c084fc;word-break:break-all;line-height:1.4;user-select:all;margin-bottom:10px;max-height:160px;overflow-y:auto;font-family:monospace}
+.mb .btns{display:flex;gap:6px}
+.mb button{flex:1;padding:9px;border:none;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;color:#fff}
+.mb .cp{background:#22c55e}
+.mb .cl{background:#333}
+.fl{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.8);background:rgba(0,0,0,.85);color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;font-weight:bold;z-index:300;opacity:0;pointer-events:none;transition:.25s}
+.fl.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.fl.err{background:#c33}
+</style>
+</head>
+<body>
+
+<div id="lgn">
+  <img src="https://i.postimg.cc/qvNrntw5/IMG-20261008-204740-452.jpg">
+  <h1>TAKST</h1>
+  <input id="inp" placeholder="الصق رمز الحساب">
+  <button onclick="enter()">تأكيد</button>
+  <div id="msg"></div>
+</div>
+
+<div id="game">
+  <div id="cvs"></div>
+  <div class="bar">
+    <div class="u"><div class="ph" id="uPic">👤</div><div class="n" id="uName"></div></div>
+    <div class="r">
+      <div class="co"><img src="https://i.postimg.cc/cHM21qYD/IMG-20261008-153917-222.jpg"><span id="uCoins">0</span></div>
+      <button class="sv" onclick="showCode()">💾 حفظ السكن</button>
+    </div>
+  </div>
+  <div class="shop" id="shop">
+    <div class="hd" onclick="shop.classList.toggle('open')">
+      <div class="bar2"></div><div class="tt">🛍️ المتجر</div>
+      <div class="cb" id="cb">0</div>
+    </div>
+    <div class="bd">
+      <div class="ttl">🎨 لون البشرة</div>
+      <div class="clrs" id="clrs"></div>
+      <div class="ttl">📦 الإكسسوارات</div>
+      <div class="grid" id="grid"></div>
+    </div>
+    <div class="bb" id="bb">
+      <div class="rw"><span>المجموع:</span><span class="a"><img src="https://i.postimg.cc/cHM21qYD/IMG-20261008-153917-222.jpg"><span id="tt">0</span></span></div>
+      <button id="buyB" onclick="checkout()">شراء</button>
+    </div>
+  </div>
+</div>
+
+<div class="mdl" id="mdl">
+  <div class="mb">
+    <h3>💾 رمز السكن</h3>
+    <div class="cd" id="code">—</div>
+    <div class="btns">
+      <button class="cp" onclick="copyCode()">📋 نسخ</button>
+      <button class="cl" onclick="mdl.classList.remove('on')">✕</button>
+    </div>
+  </div>
+</div>
+<div class="fl" id="fl"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const Y = 1.15, COIN = 'https://i.postimg.cc/cHM21qYD/IMG-20261008-153917-222.jpg';
+const CLRS = [0xf5cd30, 0x3b82f6, 0xff4444, 0xf5c9a5];
+const IMG = {
+  arm:'https://i.postimg.cc/dtSspp99/IMG-20261009-150158-773.jpg',
+  bf:'https://i.postimg.cc/Hkhr0jKD/IMG-20261009-145749-582.jpg',
+  bb:'https://i.postimg.cc/xCSTgm3h/IMG-20261009-145843-854.jpg',
+  pf:'https://i.postimg.cc/MGbRxzHT/IMG-20261009-162402-410.jpg',
+  pb:'https://i.postimg.cc/gJgZX4vk/IMG-20261009-162546-348.jpg',
+  ps:'https://i.postimg.cc/ryY4qnVd/IMG-20261009-162831-960.jpg'
+};
+
+/* أضلاع الشخصية */
+const P = {
+  head: { w:.56, h:.52, d:.56, c:0xf5cd30 },
+  body: { w:.88, h:.90, d:.46, c:0x2f6fe0, worn:null },
+  armL: { w:.40, h:.90, d:.42, c:0xf5cd30, worn:null },
+  armR: { w:.40, h:.90, d:.42, c:0xf5cd30, worn:null },
+  legs: { w:.88, h:1.08, d:.42, c:0x3fbf3f, worn:null }
+};
+
+const ITEMS = [
+  { id:'shirt', nm:'بلوزة', pr:3, img:IMG.bf },
+  { id:'pants', nm:'بنطلون', pr:3, img:IMG.pf },
+  { id:'face2', nm:'كول', pr:1, face:'cool' },
+  { id:'face3', nm:'غاضب', pr:1, face:'angry' },
+  { id:'face4', nm:'مندهش', pr:1, face:'surprised' },
+  { id:'hat', ic:'🎩', nm:'قبعة', pr:2 },
+  { id:'glasses', ic:'🕶️', nm:'نظارة', pr:2 },
+  { id:'phones', ic:'🎧', nm:'سماعة', pr:3 },
+  { id:'shoes', ic:'👟', nm:'حذاء', pr:2 },
+  { id:'pad', ic:'🎮', nm:'يد', pr:3 }
+];
+
+let user='', pic=null, coins=0, face='happy';
+const owned = new Set(), eq = new Set(), cart = new Set();
+
+const enc = o => btoa(encodeURIComponent(JSON.stringify(o))).replace(/=+$/,'').replace(/\+/g,'-').replace(/\//g,'_');
+const dec = c => { try{ let b = c.replace(/-/g,'+').replace(/_/g,'/'); while(b.length%4) b+='='; return JSON.parse(decodeURIComponent(atob(b))); }catch(e){ return null; } };
+
+function drawFace(t){
+  const c = document.createElement('canvas'); c.width = c.height = 256;
+  const x = c.getContext('2d'); x.fillStyle = '#1a1a1a';
+  const eye = (a,b,r) => { x.beginPath(); x.arc(a,b,r,0,7); x.fill(); };
+  if(t==='happy'){ eye(85,95,18); eye(171,95,18); x.strokeStyle='#1a1a1a'; x.lineWidth=16; x.lineCap='round'; x.beginPath(); x.arc(128,130,62,.47,2.67); x.stroke(); }
+  else if(t==='cool'){ x.fillRect(70,100,40,10); x.fillRect(146,100,40,10); x.strokeStyle='#1a1a1a'; x.lineWidth=14; x.lineCap='round'; x.beginPath(); x.moveTo(90,175); x.lineTo(170,150); x.stroke(); }
+  else if(t==='angry'){ x.strokeStyle='#1a1a1a'; x.lineWidth=12; x.lineCap='round'; x.beginPath(); x.moveTo(60,65); x.lineTo(105,90); x.stroke(); x.beginPath(); x.moveTo(196,65); x.lineTo(151,90); x.stroke(); eye(85,110,16); eye(171,110,16); x.beginPath(); x.arc(128,195,40,3.6,5.8); x.stroke(); }
+  else if(t==='surprised'){ eye(85,95,22); eye(171,95,22); eye(128,175,22); }
+  return c;
+}
+
+function enter(){
+  const raw = $('inp').value.trim();
+  if(!raw) return $('msg').textContent = 'أدخل الرمز';
+  const d = dec(raw);
+  if(!d || !d.u) return $('msg').textContent = 'الرمز غير صالح';
+  user = d.u; pic = d.p; coins = +d.c||0;
+  if(d.owned) d.owned.forEach(x => owned.add(x));
+  if(d.eq) d.eq.forEach(x => eq.add(x));
+  face = d.face || 'happy';
+  if(d.parts) for(const k in d.parts) Object.assign(P[k], d.parts[k]);
+  $('uName').textContent = user;
+  if(pic) $('uPic').outerHTML = `<img id="uPic" src="${pic}">`;
+  $('uCoins').textContent = coins;
+  $('lgn').style.display = 'none'; $('game').classList.add('on');
+  renderClrs(); renderItems(); init3D();
+}
+
+function renderClrs(){
+  $('clrs').innerHTML = CLRS.map(h => `<div class="clr ${P.head.c===h?'on':''}" style="background:#${h.toString(16).padStart(6,'0')}" onclick="setColor(${h})"></div>`).join('');
+}
+function setColor(h){
+  P.head.c = P.armL.c = P.armR.c = h;
+  applySkin(h); renderClrs(); flash('تم اللون ✓');
+}
+
+function renderItems(){
+  $('grid').innerHTML = ITEMS.map(a => {
+    const has = owned.has(a.id), isEq = eq.has(a.id), isC = cart.has(a.id);
+    const cls = isEq ? 'it eq' : (has ? 'it own' : (isC ? 'it crt' : 'it'));
+    const pr = has ? 'مملوك' : `<img src="${COIN}">${a.pr}`;
+    let bd = '';
+    if(has && isEq) bd = '<div class="bd2" style="background:#4ade80">✓</div>';
+    else if(has) bd = '<div class="bd2" style="background:#aaa">📦</div>';
+    else if(isC) bd = '<div class="bd2" style="background:#f5b800">🛒</div>';
+    let ic = a.ic;
+    if(a.face) ic = `<img src="${drawFace(a.face).toDataURL()}">`;
+    else if(a.img) ic = `<img src="${a.img}">`;
+    return `<div class="${cls}" onclick="tap('${a.id}')">${bd}<div class="ic">${ic}</div><div class="nm">${a.nm}</div><div class="pr">${pr}</div></div>`;
+  }).join('');
+  updCart();
+}
+
+function tap(id){
+  if(owned.has(id)){
+    if(eq.has(id)){ eq.delete(id); apply(id,0); flash('شيل'); }
+    else { eq.add(id); apply(id,1); flash('لبس ✓'); }
+  } else {
+    if(cart.has(id)){ cart.delete(id); apply(id,0); flash('شيل من العربة'); }
+    else { cart.add(id); apply(id,1); flash('أُضيف للعربة'); }
+  }
+  renderItems();
+}
+
+function updCart(){
+  const n = cart.size;
+  $('cb').textContent = n; $('cb').classList.toggle('on', n>0);
+  if(!n){ $('bb').classList.remove('on'); return; }
+  let s = 0; cart.forEach(id => s += ITEMS.find(x => x.id===id).pr);
+  $('tt').textContent = s; $('bb').classList.add('on');
+  $('buyB').disabled = s > coins;
+  $('buyB').textContent = s > coins ? 'ما معك كفاية' : 'شراء';
+}
+
+function checkout(){
+  let s = 0; cart.forEach(id => s += ITEMS.find(x => x.id===id).pr);
+  if(s > coins) return flash('ما معك كفاية', 1);
+  coins -= s; $('uCoins').textContent = coins;
+  cart.forEach(id => { owned.add(id); eq.add(id); });
+  cart.clear(); renderItems(); flash('تم الشراء ✓');
+}
+
+function showCode(){
+  const o = { u:user, c:coins, p:pic, owned:[...owned], eq:[...eq], face, parts:P };
+  $('code').textContent = enc(o);
+  $('mdl').classList.add('on');
+}
+function copyCode(){ navigator.clipboard.writeText($('code').textContent).then(() => flash('تم النسخ ✓')); }
+
+function flash(t, e){
+  const f = $('fl'); f.textContent = t;
+  f.className = 'fl on' + (e?' err':'');
+  setTimeout(() => f.className = 'fl', 1100);
+}
+
+/* ===== 3D ===== */
+let scene, camera, renderer, pivot, body, armL, armR, legs, head, faceM;
+let rY=0, rX=0, tY=0, tX=0, drag=false, lx=0, ly=0, ready=false;
+const grps = {};
+
+function init3D(){
+  if(ready) return; ready = true;
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(38, innerWidth/innerHeight, .1, 100);
+  camera.position.set(0, 1.9, 5.4); camera.lookAt(0, 1.15, 0);
+  renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+  renderer.setSize(innerWidth, innerHeight);
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.setClearColor(0, 0); renderer.shadowMap.enabled = true;
+  $('cvs').appendChild(renderer.domElement);
+  scene.add(new THREE.AmbientLight(0xffffff, .8));
+  const k = new THREE.DirectionalLight(0xffffff, .85); k.position.set(4,8,6); k.castShadow = true; scene.add(k);
+  pivot = new THREE.Group(); pivot.position.y = Y; scene.add(pivot);
+  build();
+  eq.forEach(id => apply(id,1));
+  bind(); anim();
+  addEventListener('resize', () => { camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+}
+
+function mk(m,x,y,z){ m.position.set(x, y-Y, z); m.castShadow = true; m.receiveShadow = true; pivot.add(m); return m; }
+
+function build(){
+  const L = new THREE.TextureLoader();
+  const t = k => L.load(IMG[k]);
+  const tA = t('arm');
+  const bodyPlain = new THREE.MeshStandardMaterial({ color:P.body.c, roughness:.55 });
+  body = mk(new THREE.Mesh(new THREE.BoxGeometry(P.body.w,P.body.h,P.body.d), bodyPlain), 0, 1.4, 0);
+  body.userData = { plain: bodyPlain, tex: [tA,tA,tA,tA,t('bf'),t('bb')].map(x => new THREE.MeshStandardMaterial({map:x, roughness:.55})) };
+
+  const armPlain = new THREE.MeshStandardMaterial({ color:P.armL.c, roughness:.5 });
+  const armTex = new THREE.MeshStandardMaterial({map:tA, roughness:.55});
+  const armG = new THREE.BoxGeometry(P.armL.w,P.armL.h,P.armL.d);
+  armL = mk(new THREE.Mesh(armG, armPlain), -.66, 1.4, 0);
+  armR = mk(new THREE.Mesh(armG, armPlain), .66, 1.4, 0);
+  armL.userData = { plain: armPlain, tex: armTex };
+  armR.userData = { plain: armPlain, tex: armTex };
+
+  const legsPlain = new THREE.MeshStandardMaterial({ color:P.legs.c, roughness:.5 });
+  legs = mk(new THREE.Mesh(new THREE.BoxGeometry(P.legs.w,P.legs.h,P.legs.d), legsPlain), 0, .54, 0);
+  legs.userData = { plain: legsPlain, tex: [t('ps'),t('ps'),t('ps'),t('ps'),t('pf'),t('pb')].map(x => new THREE.MeshStandardMaterial({map:x, roughness:.55})) };
+
+  head = mk(new THREE.Mesh(new THREE.CylinderGeometry(P.head.w/2,P.head.w/2,P.head.h,48),
+    new THREE.MeshStandardMaterial({ color:P.head.c, roughness:.5 })), 0, 2.11, 0);
+
+  faceM = new THREE.Mesh(new THREE.PlaneGeometry(.5,.5), new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(drawFace(face)), transparent:true, depthWrite:false}));
+  faceM.position.set(0, 2.14 - Y, .285); pivot.add(faceM);
+}
+
+function applySkin(h){
+  head.material.color.setHex(h);
+  if(!eq.has('shirt')){
+    armL.material = armL.userData.plain; armL.material.color.setHex(h);
+    armR.material = armR.userData.plain; armR.material.color.setHex(h);
+  }
+}
+
+function apply(id, on){
+  if(id === 'shirt'){
+    P.body.worn = P.armL.worn = P.armR.worn = on ? 'shirt' : null;
+    if(on){ body.material = body.userData.tex; armL.material = armL.userData.tex; armR.material = armR.userData.tex; }
+    else { body.material = body.userData.plain; armL.material = armL.userData.plain; armR.material = armR.userData.plain; applySkin(P.armL.c); }
+    return;
+  }
+  if(id === 'pants'){ P.legs.worn = on ? 'pants' : null; legs.material = on ? legs.userData.tex : legs.userData.plain; return; }
+  if(id.startsWith('face')){ if(on) face = id === 'face2' ? 'cool' : id === 'face3' ? 'angry' : 'surprised'; else if(!eq.size) face = 'happy'; faceM.material.map.dispose(); faceM.material.map = new THREE.CanvasTexture(drawFace(face)); faceM.material.needsUpdate = true; return; }
+
+  if(!on){ if(grps[id]){ pivot.remove(grps[id]); delete grps[id]; } return; }
+  if(grps[id]) return;
+
+  const g = new THREE.Group(); pivot.add(g); grps[id] = g;
+  const put = (m,x,y,z) => { m.position.set(x, y-Y, z); m.castShadow = true; g.add(m); };
+  const M = c => new THREE.MeshStandardMaterial({ color:c, roughness:.5 });
+
+  if(id === 'hat'){
+    put(new THREE.Mesh(new THREE.CylinderGeometry(.21,.21,.3,32), M(.1)), 0, 2.53, 0);
+    put(new THREE.Mesh(new THREE.CylinderGeometry(.35,.35,.03,32), M(.1)), 0, 2.37, 0);
+  }
+  if(id === 'glasses'){
+    put(new THREE.Mesh(new THREE.BoxGeometry(.22,.18,.02), M(.1)), -.145, 2.15, .29);
+    put(new THREE.Mesh(new THREE.BoxGeometry(.22,.18,.02), M(.1)), .145, 2.15, .29);
+    put(new THREE.Mesh(new THREE.BoxGeometry(.06,.03,.03), M(.1)), 0, 2.15, .29);
+  }
+  if(id === 'phones'){
+    const m = M(.15);
+    const b = new THREE.Mesh(new THREE.TorusGeometry(.31,.028,10,28,Math.PI), m);
+    b.position.set(0, 2.11-Y, 0); g.add(b);
+    put(new THREE.Mesh(new THREE.SphereGeometry(.09,16,16), m), -.3, 2.11, 0);
+    put(new THREE.Mesh(new THREE.SphereGeometry(.09,16,16), m), .3, 2.11, 0);
+  }
+  if(id === 'shoes'){
+    put(new THREE.Mesh(new THREE.BoxGeometry(.46,.16,.5), M(.1)), -.21, .08, .08);
+    put(new THREE.Mesh(new THREE.BoxGeometry(.46,.16,.5), M(.1)), .21, .08, .08);
+  }
+  if(id === 'pad'){
+    put(new THREE.Mesh(new THREE.BoxGeometry(.4,.13,.11), M(.12)), 0, 1.35, -.3);
+  }
+}
+
+function bind(){
+  const el = renderer.domElement;
+  el.addEventListener('pointerdown', e => { drag = true; lx = e.clientX; ly = e.clientY; el.setPointerCapture(e.pointerId); });
+  el.addEventListener('pointermove', e => {
+    if(!drag) return;
+    tY += (e.clientX - lx) * .008;
+    tX = Math.max(-.5, Math.min(.5, tX + (e.clientY - ly) * .005));
+    lx = e.clientX; ly = e.clientY;
+  });
+  el.addEventListener('pointerup', () => drag = false);
+  el.addEventListener('pointercancel', () => drag = false);
+}
+
+function anim(){
+  requestAnimationFrame(anim);
+  rY += (tY - rY) * .15; rX += (tX - rX) * .15;
+  pivot.rotation.y = rY; pivot.rotation.x = rX;
+  renderer.render(scene, camera);
+}
+</script>
+</body>
+</html>
